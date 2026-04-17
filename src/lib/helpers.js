@@ -3,7 +3,12 @@ import { COLORS, NAME_ALIASES } from './constants.js';
 export const TODAY = new Date();
 export const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
 export const fmtDate = d => d.toLocaleDateString("ro-RO", { day: "2-digit", month: "short" });
-export const isoDate = d => d.toISOString().split("T")[0];
+export const isoDate = d => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
 
 export const weekMonday = d => {
   const r = new Date(d);
