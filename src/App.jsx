@@ -25,6 +25,11 @@ export default function App() {
 
   const allOwners = useMemo(() => getAllOwners(priorities), [priorities]);
   const myName = useMemo(() => resolveMyName(user, allOwners), [user, allOwners]);
+  const boardCols = useMemo(() => {
+    let cols = allOwners.filter(o => filterOwner === "Toți" || o === filterOwner);
+    if (myName && cols.includes(myName)) cols = [myName, ...cols.filter(o => o !== myName)];
+    return cols;
+  }, [allOwners, filterOwner, myName]);
 
   const selected = priorities.find(p => p.id === selectedId);
 
@@ -65,13 +70,6 @@ export default function App() {
   }
 
   if (!user) return <LoginScreen onLogin={signInWithGoogle} loading={authLoading} />;
-
-  // Board columns: me first
-  const boardCols = useMemo(() => {
-    let cols = allOwners.filter(o => filterOwner === "Toți" || o === filterOwner);
-    if (myName && cols.includes(myName)) cols = [myName, ...cols.filter(o => o !== myName)];
-    return cols;
-  }, [allOwners, filterOwner, myName]);
 
   const boardWeek = filterWeek || CUR_WEEK;
   const getBoard = owner => {
