@@ -13,7 +13,7 @@ export const weekMonday = d => {
   return r;
 };
 
-export const weekLabel = mon => `${fmtDate(mon)} â ${fmtDate(addDays(mon, 4))}`;
+export const weekLabel = mon => `${fmtDate(mon)} — ${fmtDate(addDays(mon, 4))}`;
 export const weekKey = mon => isoDate(mon);
 export const CUR_WEEK = weekKey(weekMonday(TODAY));
 export const wk = offset => weekKey(addDays(weekMonday(TODAY), offset * 7));

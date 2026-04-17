@@ -11,20 +11,20 @@ export const COLORS = {
   Otilia:{bg:"#DCFCE7",text:"#15803D"},Bogdan:{bg:"#FDF2F8",text:"#BE185D"},
 };
 
-export const MODULES = ["Core â Conta","Core â Non-Conta","Bono (Company)"];
-export const ALL_PHASES = ["Planificare AnalizÄ","ExecuÈie AnalizÄ","Design","Implementare IT","Review"];
-export const STATUSES = ["AnalizÄ","Implementare","Review","Done"];
+export const MODULES = ["Core — Conta","Core — Non-Conta","Bono (Company)"];
+export const ALL_PHASES = ["Planificare Analiză","Execuție Analiză","Design","Implementare IT","Review"];
+export const STATUSES = ["Analiză","Implementare","Review","Done"];
 
 export const phaseColor = {
-  "Planificare AnalizÄ":{bg:"#EDE9FE",text:"#5B21B6"},
-  "ExecuÈie AnalizÄ":{bg:"#FDF2F8",text:"#BE185D"},
+  "Planificare Analiză":{bg:"#EDE9FE",text:"#5B21B6"},
+  "Execuție Analiză":{bg:"#FDF2F8",text:"#BE185D"},
   "Design":{bg:"#E0F2FE",text:"#0369A1"},
   "Implementare IT":{bg:"#D1FAE5",text:"#065F46"},
   "Review":{bg:"#FEF3C7",text:"#92400E"},
 };
 
 export const statusColor = {
-  "AnalizÄ":{bg:"#EDE9FE",text:"#5B21B6"},
+  "Analiză":{bg:"#EDE9FE",text:"#5B21B6"},
   "Implementare":{bg:"#D1FAE5",text:"#065F46"},
   "Review":{bg:"#FEF3C7",text:"#92400E"},
   "Done":{bg:"#F0FDF4",text:"#15803D"},
@@ -37,7 +37,7 @@ export const taskSC = {
   todo:{bg:"#F1F5F9",text:"#475569",border:"#E2E8F0"},
 };
 
-// Common BONO emailâname aliases
+// Common BONO email→name aliases
 export const NAME_ALIASES = {
   "bogdan":"BGN","bgn":"BGN","cristi":"Cristi","chris":"Chris",
   "adi":"Adi","vlad":"Vlad","alex":"Alex","alexandra":"Alexandra",

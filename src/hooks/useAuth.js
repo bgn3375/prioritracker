@@ -6,30 +6,72 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) { loadProfile(session.user); } else { setLoading(false); }
-    });
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (session?.user) {
+          await loadProfile(session.user);
+        } else {
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('getSession failed:', err);
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (ev, session) => {
-      if (ev === 'SIGNED_IN' && session?.user) await loadProfile(session.user);
-      else if (ev === 'SIGNED_OUT') setUser(null);
+      if (cancelled) return;
+      if ((ev === 'SIGNED_IN' || ev === 'INITIAL_SESSION' || ev === 'TOKEN_REFRESHED') && session?.user) {
+        await loadProfile(session.user);
+      } else if (ev === 'SIGNED_OUT') {
+        setUser(null);
+        setLoading(false);
+      }
     });
-    return () => subscription.unsubscribe();
+
+    return () => { cancelled = true; subscription.unsubscribe(); };
   }, []);
 
   async function loadProfile(au) {
-    let profile = null;
-    for (let i = 0; i < 3; i++) {
-      const { data } = await supabase.from('profiles').select('*').eq('id', au.id).single();
-      if (data) { profile = data; break; }
-      await new Promise(r => setTimeout(r, 500));
-    }
-    if (profile) { setUser(profile); } else {
-      setUser({ id: au.id, email: au.email,
+    try {
+      let profile = null;
+      for (let i = 0; i < 3; i++) {
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', au.id).maybeSingle();
+        if (error) {
+          console.error(`loadProfile attempt ${i + 1} error:`, error);
+          break;
+        }
+        if (data) { profile = data; break; }
+        await new Promise(r => setTimeout(r, 500));
+      }
+      if (profile) {
+        setUser(profile);
+      } else {
+        console.warn('Profile not found in DB — falling back to auth metadata');
+        setUser({
+          id: au.id,
+          email: au.email,
+          display_name: au.user_metadata?.full_name || au.email?.split('@')[0] || '',
+          initials: (au.user_metadata?.full_name || au.email?.split('@')[0] || 'U').slice(0, 2).toUpperCase(),
+          avatar_url: au.user_metadata?.avatar_url || null,
+        });
+      }
+    } catch (err) {
+      console.error('loadProfile failed:', err);
+      setUser({
+        id: au.id,
+        email: au.email,
         display_name: au.user_metadata?.full_name || au.email?.split('@')[0] || '',
-        initials: (au.user_metadata?.full_name || au.email?.split('@')[0] || 'U').slice(0,2).toUpperCase(),
-        avatar_url: au.user_metadata?.avatar_url || null });
+        initials: (au.user_metadata?.full_name || au.email?.split('@')[0] || 'U').slice(0, 2).toUpperCase(),
+        avatar_url: au.user_metadata?.avatar_url || null,
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function signInWithGoogle() {
@@ -45,8 +87,8 @@ export function useAuth() {
   async function updateDisplayName(n) {
     if (!user) return;
     const { error } = await supabase.from('profiles')
-      .update({ display_name: n, initials: n.slice(0,2).toUpperCase() }).eq('id', user.id);
-    if (!error) setUser(p => ({ ...p, display_name: n, initials: n.slice(0,2).toUpperCase() }));
+      .update({ display_name: n, initials: n.slice(0, 2).toUpperCase() }).eq('id', user.id);
+    if (!error) setUser(p => ({ ...p, display_name: n, initials: n.slice(0, 2).toUpperCase() }));
   }
 
   return { user, loading, signInWithGoogle, signOut, updateDisplayName };
