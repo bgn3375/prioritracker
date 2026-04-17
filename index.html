@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrioriTracker â BONO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;overflow-x:hidden}
+    input[type=checkbox]{accent-color:#EC4899;cursor:pointer;width:15px;height:15px}
+    select,input,textarea,button{font-family:inherit}
+    ::-webkit-scrollbar{height:6px;width:6px}
+    ::-webkit-scrollbar-track{background:#F1F5F9}
+    ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+    .fade-in{animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .slide-in{animation:slideIn .2s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+    .hover-card{transition:all .15s}
+    .hover-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.07);border-color:#f9a8d4!important}
+    textarea{resize:vertical}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
