@@ -7,12 +7,26 @@ export function useData(user) {
 
   const loadAll = useCallback(async () => {
     setLoading(true);
+    // Safety net: if anything hangs for 15s, unblock the UI.
+    const hardTimeout = setTimeout(() => {
+      console.warn('useData hard timeout — forcing loading=false');
+      setLoading(false);
+    }, 15000);
+    const withTimeout = (p, label) => Promise.race([
+      p,
+      new Promise((_, rej) => setTimeout(() => rej(new Error(`${label} timeout`)), 10000)),
+    ]);
     try {
-      const { data: pRows, error: pErr } = await supabase.from('priorities').select('*').order('created_at', { ascending: true });
-      if (pErr) { console.error('Load priorities:', pErr); setLoading(false); return; }
-      const { data: tRows } = await supabase.from('tasks').select('*').order('sort_order');
-      const { data: cRows } = await supabase.from('comments').select('*').order('created_at');
-      const { data: lRows } = await supabase.from('links').select('*').order('created_at');
+      const { data: pRows, error: pErr } = await withTimeout(
+        supabase.from('priorities').select('*').order('created_at', { ascending: true }),
+        'priorities'
+      );
+      if (pErr) { console.error('Load priorities:', pErr); clearTimeout(hardTimeout); setLoading(false); return; }
+      const [{ data: tRows }, { data: cRows }, { data: lRows }] = await Promise.all([
+        withTimeout(supabase.from('tasks').select('*').order('sort_order'), 'tasks'),
+        withTimeout(supabase.from('comments').select('*').order('created_at'), 'comments'),
+        withTimeout(supabase.from('links').select('*').order('created_at'), 'links'),
+      ]);
       const tasks = tRows || [], comments = cRows || [], links = lRows || [];
       const mapC = c => ({ id: c.id, author: c.author, text: c.body, time: c.created_at });
       const mapL = l => ({ id: l.id, url: l.url, label: l.label || l.url });
@@ -32,6 +46,7 @@ export function useData(user) {
     } catch (err) {
       console.error('loadAll failed:', err);
     } finally {
+      clearTimeout(hardTimeout);
       setLoading(false);
     }
   }, []);
