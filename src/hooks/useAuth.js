@@ -53,12 +53,13 @@ export function useAuth() {
   }, []);
 
   async function loadProfile(au) {
+    const googlePic = au.user_metadata?.picture || au.user_metadata?.avatar_url || null;
     const fallback = {
       id: au.id,
       email: au.email,
       display_name: au.user_metadata?.full_name || au.email?.split('@')[0] || '',
       initials: (au.user_metadata?.full_name || au.email?.split('@')[0] || 'U').slice(0, 2).toUpperCase(),
-      avatar_url: au.user_metadata?.avatar_url || null,
+      avatar_url: googlePic,
     };
     try {
       let profile = null;
@@ -80,6 +81,18 @@ export function useAuth() {
         }
         await new Promise(r => setTimeout(r, 500));
       }
+
+      // Sync avatar from Google if changed (Google updates user_metadata on each login,
+      // but the trigger only fires on INSERT, so profile row goes stale).
+      if (profile && googlePic && googlePic !== profile.avatar_url) {
+        profile = { ...profile, avatar_url: googlePic };
+        withTimeout(
+          supabase.from('profiles').update({ avatar_url: googlePic }).eq('id', au.id),
+          4000,
+          'avatar sync'
+        ).catch(err => console.warn('Avatar sync failed (non-fatal):', err));
+      }
+
       setUser(profile || (console.warn('Profile not found — using auth metadata fallback'), fallback));
     } catch (err) {
       console.error('loadProfile failed:', err);
