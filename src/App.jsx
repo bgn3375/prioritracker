@@ -4,6 +4,7 @@ import { TODAY, addDays, fmtDate, weekMonday, weekKey, weekLabel, CUR_WEEK, task
 import { useAuth } from './hooks/useAuth.js';
 import { useData } from './hooks/useData.js';
 import LoginScreen from './components/LoginScreen.jsx';
+import UserMenu from './components/UserMenu.jsx';
 import { Chip, Badge, Btn } from './components/UI.jsx';
 import { PriorityForm, ImportModal } from './components/Forms.jsx';
 import PriorityPage from './components/PriorityPage.jsx';
@@ -21,7 +22,6 @@ export default function App() {
   const [showAddP, setShowAddP] = useState(false);
   const [editingP, setEditingP] = useState(null);
   const [showImport, setShowImport] = useState(false);
-  const [showNameModal, setShowNameModal] = useState(false);
 
   const allOwners = useMemo(() => getAllOwners(priorities), [priorities]);
   const myName = useMemo(() => resolveMyName(user, allOwners), [user, allOwners]);
@@ -126,15 +126,12 @@ export default function App() {
           <button onClick={() => setShowImport(true)} style={{ padding: "5px 14px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.1)", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>↑ Import</button>
           <button onClick={() => setShowAddP(true)} style={{ padding: "5px 14px", borderRadius: 999, border: "none", background: "#fff", color: "#374151", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>+ Prioritate</button>
         </div>
-        <div style={{ marginLeft: 16, display: "flex", alignItems: "center", gap: 8, padding: "3px 12px 3px 4px", borderRadius: 999, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", cursor: "pointer", flexShrink: 0 }}
-          onClick={() => { if (confirm("Te deconectezi?")) signOut(); }}
-          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.22)"}
-          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}>
-          {user.avatar_url
-            ? <img src={user.avatar_url} style={{ width: 26, height: 26, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.5)" }} alt="" />
-            : <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#fff" }}>{user.initials}</div>}
-          <span style={{ fontSize: 12, fontWeight: 500, color: "#fff", whiteSpace: "nowrap" }}>{myName || user.display_name}</span>
-        </div>
+        <UserMenu
+          user={user}
+          displayName={myName}
+          onSignOut={signOut}
+          onUpdateName={updateDisplayName}
+        />
       </div>
 
       {/* Data loading */}
